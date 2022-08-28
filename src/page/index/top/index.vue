@@ -1,0 +1,148 @@
+<template>
+  <div class="avue-top">
+    <div class="top-bar__left">
+      <div class="avue-breadcrumb"
+           :class="[{ 'avue-breadcrumb--active': isCollapse }]"
+           v-if="setting.collapse&&!isHorizontal">
+        <i class="icon-navicon"
+           @click="setCollapse"></i>
+      </div>
+    </div>
+    <div class="top-bar__title">
+      <div class="top-bar__item top-bar__item--show"
+           v-if="setting.menu">
+        <top-menu ref="topMenu"></top-menu>
+      </div>
+      <span class="top-bar__item"
+            v-if="setting.search">
+        <top-search></top-search>
+      </span>
+    </div>
+    <div class="top-bar__right">
+      <el-tooltip v-if="setting.color"
+                  effect="dark"
+                  :content="$t('navbar.color')"
+                  placement="bottom">
+        <div class="top-bar__item">
+          <top-color></top-color>
+        </div>
+      </el-tooltip>
+      <el-tooltip v-if="setting.lock"
+                  effect="dark"
+                  :content="$t('navbar.lock')"
+                  placement="bottom">
+        <div class="top-bar__item">
+          <top-lock></top-lock>
+        </div>
+      </el-tooltip>
+      <el-tooltip v-if="setting.theme"
+                  effect="dark"
+                  :content="$t('navbar.theme')"
+                  placement="bottom">
+        <div class="top-bar__item top-bar__item--show">
+          <top-theme></top-theme>
+        </div>
+      </el-tooltip>
+      <el-tooltip effect="dark"
+                  :content="$t('navbar.notice')"
+                  placement="bottom">
+        <div class="top-bar__item top-bar__item--show">
+          <top-notice></top-notice>
+        </div>
+      </el-tooltip>
+
+      <el-tooltip v-if="setting.fullscren"
+                  effect="dark"
+                  :content="isFullScren?$t('navbar.screenfullF'):$t('navbar.screenfull')"
+                  placement="bottom">
+        <div class="top-bar__item">
+          <i :class="isFullScren?'icon-tuichuquanping':'icon-quanping'"
+             @click="handleScreen"></i>
+        </div>
+      </el-tooltip>
+      <img class="top-bar__img"
+           :src="userInfo.userAvatar">
+      <el-dropdown>
+        <span class="el-dropdown-link">
+          {{userInfo.userName}}
+          <i class="el-icon-arrow-down el-icon--right"></i>
+        </span>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item>
+            <router-link to="/info/index">{{$t('navbar.userinfo')}}</router-link>
+          </el-dropdown-item>
+          <el-dropdown-item @click.native="logout"
+                            divided>{{$t('navbar.logOut')}}</el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
+    </div>
+  </div>
+</template>
+<script>
+import { resetRouter } from '@/router/router'
+import { mapGetters } from "vuex";
+import { fullscreenToggel, listenfullscreen } from "@/util/util";
+import topLock from "./top-lock";
+import topMenu from "./top-menu";
+import topSearch from "./top-search";
+import topTheme from "./top-theme";
+import topColor from "./top-color";
+import topNotice from './top-notice'
+export default {
+  components: {
+    topLock,
+    topMenu,
+    topSearch,
+    topTheme,
+    topColor,
+    topNotice
+  },
+  name: "top",
+  data () {
+    return {};
+  },
+  filters: {},
+  created () { },
+  mounted () {
+    listenfullscreen(this.setScreen);
+  },
+  computed: {
+    ...mapGetters([
+      "setting",
+      "userInfo",
+      "isFullScren",
+      "tagWel",
+      "tagList",
+      "isCollapse",
+      "tag",
+      "isHorizontal"
+    ])
+  },
+  methods: {
+    handleScreen () {
+      fullscreenToggel();
+    },
+    setCollapse () {
+      this.$store.commit("SET_COLLAPSE");
+    },
+    setScreen () {
+      this.$store.commit("SET_FULLSCREN");
+    },
+    logout () {
+      this.$confirm(this.$t("logoutTip"), this.$t("tip"), {
+        confirmButtonText: this.$t("submitText"),
+        cancelButtonText: this.$t("cancelText"),
+        type: "warning"
+      }).then(() => {
+        this.$store.dispatch("LogOut").then(() => {
+          resetRouter();
+          this.$router.push({ path: "/login" });
+        });
+      });
+    }
+  }
+};
+</script>
+
+<style lang="scss" scoped>
+</style>
